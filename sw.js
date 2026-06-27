@@ -1,6 +1,11 @@
-const CACHE = 'crck2-v1';
-const ASSETS = ['/', '/index.html', '/manifest.json',
-  '/icons/icon-192x192.png', '/icons/icon-512x512.png'];
+const CACHE = 'crck2-v2';
+const ASSETS = [
+  '/crck2-farm2/',
+  '/crck2-farm2/index.html',
+  '/crck2-farm2/manifest.json',
+  '/crck2-farm2/icons/icon-192x192.png',
+  '/crck2-farm2/icons/icon-512x512.png'
+];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)));
@@ -16,14 +21,12 @@ self.addEventListener('activate', e => {
 
 self.addEventListener('fetch', e => {
   const url = e.request.url;
-  // Don't cache Google Sheets CSV — always fetch live
   if (url.includes('docs.google.com')) {
     e.respondWith(fetch(e.request).catch(() =>
       new Response('{"error":"offline"}', { headers: { 'Content-Type': 'application/json' } })
     ));
     return;
   }
-  // Cache-first for app shell
   e.respondWith(
     caches.match(e.request).then(cached => cached || fetch(e.request).then(res => {
       if (res.ok) {
